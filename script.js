@@ -21,9 +21,9 @@
   ];
 
   const SEED_POSTS = [
-    { id: 1, title: 'Designing MCP architecture for enterprise agents', date: 'Jun 2026', tag: 'AI', summary: 'How we structured the Model Context Protocol layer so multi-agent systems stay composable and secure at enterprise scale.', url: '' },
-    { id: 2, title: 'From 0 to 1 to 10: scaling two SaaS products', date: 'Apr 2026', tag: 'Product', summary: 'Lessons on momentum, prioritization, and the metrics that actually matter when you take a product from concept to scale.', url: '' },
-    { id: 3, title: 'What developer evangelism taught me about GTM', date: 'Feb 2026', tag: 'GTM', summary: 'Battlecards, demos, and DeployFest 2026: why the best go-to-market is built with developers, not at them.', url: '' }
+    { id: 1, title: 'Designing MCP architecture for enterprise agents', date: 'Jun 2026', tag: 'AI', summary: 'How we structured the Model Context Protocol layer so multi-agent systems stay composable and secure at enterprise scale.', url: '', upvotes: 0 },
+    { id: 2, title: 'From 0 to 1 to 10: scaling two SaaS products', date: 'Apr 2026', tag: 'Product', summary: 'Lessons on momentum, prioritization, and the metrics that actually matter when you take a product from concept to scale.', url: '', upvotes: 0 },
+    { id: 3, title: 'What developer evangelism taught me about GTM', date: 'Feb 2026', tag: 'GTM', summary: 'Battlecards, demos, and DeployFest 2026: why the best go-to-market is built with developers, not at them.', url: '', upvotes: 0 }
   ];
 
   const TWITTER_HANDLE = 'vineetpujari';
@@ -276,9 +276,29 @@
         <p>${esc(post.summary)}</p>
         <div class="blog-card-bottom">
           ${post.url ? `<a href="${esc(post.url)}" target="_blank" rel="noopener">Read post →</a>` : '<span></span>'}
+          <button class="btn-upvote${post.upvoted ? ' upvoted' : ''}" data-post-id="${post.id}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="${post.upvoted ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+            <span>${post.upvotes || 0}</span>
+          </button>
           <button class="btn-remove-post" data-post-id="${post.id}">Remove</button>
         </div>`;
       grid.appendChild(card);
+    });
+
+    grid.querySelectorAll('.btn-upvote').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const post = posts.find(p => p.id === Number(btn.dataset.postId));
+        if (!post) return;
+        if (post.upvoted) {
+          post.upvotes = Math.max(0, (post.upvotes || 0) - 1);
+          post.upvoted = false;
+        } else {
+          post.upvotes = (post.upvotes || 0) + 1;
+          post.upvoted = true;
+        }
+        persistPosts();
+        renderBlog();
+      });
     });
 
     grid.querySelectorAll('.btn-remove-post').forEach(btn => {
@@ -337,7 +357,7 @@
 
     if (gameOver) {
       document.getElementById('game-final-score').textContent = 'Time! You scored ' + score + '.';
-      const tweetText = 'I scored ' + score + ' in Chocolate Dash on Vineet Pujari’s portfolio! @' + TWITTER_HANDLE + ' — I want that box of chocolates. #ChocolateDash';
+      const tweetText = 'I scored ' + score + ' in Chocolate Dash on Vineet Pujari’s portfolio! @' + TWITTER_HANDLE + ' >>> I want that box of chocolates. #ChocolateDash';
       document.getElementById('tweet-link').href = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(tweetText);
     }
 
