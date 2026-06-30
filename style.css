@@ -49,12 +49,12 @@ body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(
   text-decoration: none; transition: color .15s ease;
 }
 .nav-links a:hover { color: var(--ink); }
-.btn-hello {
+.nav-links a.btn-hello {
   font: 600 15px/1 var(--sans); color: #fff; background: var(--ink);
   text-decoration: none; padding: 11px 18px; border-radius: 999px;
   transition: background .15s ease;
 }
-.btn-hello:hover { background: var(--accent); }
+.nav-links a.btn-hello:hover { background: var(--accent); color: #fff; }
 
 /* ── Hero ───────────────────────────────────────────────────── */
 .hero {
