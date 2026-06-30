@@ -424,9 +424,24 @@
     return d.innerHTML;
   }
 
+  // ── Visitor counter ────────────────────────────────────────
+  function initVisitCounter() {
+    let visits = parseInt(localStorage.getItem('pm-visit-count') || '0', 10) + 1;
+    localStorage.setItem('pm-visit-count', String(visits));
+    const el = document.getElementById('visit-counter');
+    el.textContent = visits === 1 ? '1 visit' : visits + ' visits';
+    let timer = null;
+    document.getElementById('hero-photo').addEventListener('click', () => {
+      el.classList.add('visible');
+      clearTimeout(timer);
+      timer = setTimeout(() => el.classList.remove('visible'), 3000);
+    });
+  }
+
   // ── Wire up game cells ─────────────────────────────────────
   document.addEventListener('DOMContentLoaded', () => {
     init();
+    initVisitCounter();
     for (let i = 0; i < 9; i++) {
       document.getElementById('cell-' + i).addEventListener('click', () => whack(i));
     }

@@ -72,7 +72,16 @@ body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(
   border: 4px solid var(--line);
   animation: riseIn .6s ease .3s both;
 }
+.hero-photo { position: relative; cursor: pointer; }
 .hero-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.visit-counter {
+  position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
+  font: 500 12px/1 var(--sans); color: var(--muted);
+  background: var(--card); border: 1px solid var(--line);
+  padding: 5px 12px; border-radius: 999px; white-space: nowrap;
+  opacity: 0; pointer-events: none; transition: opacity .3s ease;
+}
+.visit-counter.visible { opacity: 1; }
 .hero-badge {
   display: inline-flex; align-items: center; gap: 9px;
   margin-bottom: 22px; padding: 8px 14px; border-radius: 999px;
