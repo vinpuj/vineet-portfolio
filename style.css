@@ -95,7 +95,7 @@ body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(
 .hero-badge-text { font: 600 13px/1 var(--sans); color: var(--muted); }
 .hero h1 {
   font-family: var(--display); font-weight: 800;
-  font-size: clamp(40px, 6vw, 86px); line-height: .98;
+  font-size: clamp(20px, 5vw, 60px); line-height: .98;
   letter-spacing: -.03em; color: var(--ink); margin: 0;
   animation: riseIn .6s ease .08s both;
 }
