@@ -35,6 +35,7 @@
   let composerOpen = false;
   let posts = [];
   let media = {};
+  let drops = {};
   let gameActive = false;
   let gameOver = false;
   let score = 0;
@@ -47,6 +48,7 @@
   // ── Init ───────────────────────────────────────────────────
   function init() {
     try { media = JSON.parse(localStorage.getItem('pm-mockups-media')) || {}; } catch (e) { media = {}; }
+    try { drops = JSON.parse(localStorage.getItem('pm-mockups-drops')) || {}; } catch (e) { drops = {}; }
     try { highScore = parseInt(localStorage.getItem('pm-choco-highscore') || '0', 10) || 0; } catch (e) {}
     try {
       const raw = localStorage.getItem('pm-blog-posts');
@@ -130,10 +132,10 @@
 
   // ── Mockups ────────────────────────────────────────────────
   const MOCKUP_SLOTS = [
-    { id: 'mock-automation360', title: 'Automation 360 · AI Agent Studio', subtitle: 'Agentic automation platform — Automation Anywhere', url: 'automationanywhere.com' },
-    { id: 'mock-citrix', title: 'Citrix developer platform', subtitle: 'API gateway & developer portal — Citrix', url: 'developer.citrix.com' },
-    { id: 'mock-dell', title: 'Dell PartnerDirect', subtitle: 'Channel self-service & fulfillment — Dell', url: 'partnerdirect.dell.com' },
-    { id: 'mock-chocolate', title: 'Handmade chocolate gifting', subtitle: 'Co-founded venture — Bengaluru', url: 'chocolate gifting' }
+    { id: 'mock-automation360', title: 'Automation 360 · AI Agent Studio', subtitle: 'Agentic automation platform — Automation Anywhere', url: 'automationanywhere.com', image: 'mockups/mock-automation360.jpg' },
+    { id: 'mock-citrix', title: 'Citrix developer platform', subtitle: 'API gateway & developer portal — Citrix', url: 'developer-docs.citrix.com', image: 'mockups/mock-citrix.jpg' },
+    { id: 'mock-dell', title: 'Dell PartnerDirect', subtitle: 'Channel self-service & fulfillment — Dell', url: 'partnerdirect.dell.com', image: 'mockups/mock-dell.jpg' },
+    { id: 'mock-chocolate', title: 'Twenty Hampers', subtitle: 'Co-founded gifting venture — Bengaluru', url: 'twentyhampers.com', image: 'mockups/mock-chocolate.jpg' }
   ];
 
   function normalizeVideoUrl(raw) {
@@ -146,6 +148,11 @@
     if ((m = url.match(/loom\.com\/(?:share|embed)\/([\w-]+)/i))) return { type: 'embed', src: 'https://www.loom.com/embed/' + m[1] };
     return { type: 'embed', src: url };
   }
+
+  const PLACEHOLDER = `<div class="mockup-placeholder">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+          <div>Drop a screenshot</div>
+        </div>`;
 
   function renderMockups() {
     const grid = document.getElementById('mockups-grid');
@@ -168,11 +175,15 @@
           viewportContent = `<iframe src="${esc(n.src)}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen loading="lazy" style="width:100%;height:100%;border:0;display:block"></iframe>`;
         }
         inputRow = `<button class="btn-remove-video" data-slot="${slot.id}">Remove video</button>`;
+      } else if (drops[slot.id]) {
+        viewportContent = `<img src="${esc(drops[slot.id])}" alt="${esc(slot.title)}">`;
+        inputRow = `<button class="btn-remove-video" data-slot-drop="${slot.id}">Remove image</button>`;
+      } else if (slot.image) {
+        viewportContent = `<img src="${esc(slot.image)}" alt="${esc(slot.title)}" data-shipped="${slot.id}">`;
+        inputRow = `<input type="text" placeholder="Paste a video link" data-slot-input="${slot.id}">
+          <button class="btn-embed" data-slot-embed="${slot.id}">Embed</button>`;
       } else {
-        viewportContent = `<div class="mockup-placeholder">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
-          <div>Drop a screenshot</div>
-        </div>`;
+        viewportContent = PLACEHOLDER;
         inputRow = `<input type="text" placeholder="Paste a video link" data-slot-input="${slot.id}">
           <button class="btn-embed" data-slot-embed="${slot.id}">Embed</button>`;
       }
@@ -216,13 +227,30 @@
       });
     });
 
+    grid.querySelectorAll('.btn-remove-video[data-slot-drop]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        delete drops[btn.dataset.slotDrop];
+        persistDrops();
+        renderMockups();
+      });
+    });
+
+    // A slot with no committed screenshot yet falls back to the drop prompt.
+    // Checks decoded size too: a dev server in SPA mode answers a missing
+    // file with index.html at status 200, so 'error' never fires.
+    grid.querySelectorAll('img[data-shipped]').forEach(img => {
+      const fallback = () => {
+        const vp = img.closest('.mockup-viewport');
+        if (vp) { vp.innerHTML = PLACEHOLDER; setupDragDrop(vp, img.dataset.shipped); }
+      };
+      img.addEventListener('error', fallback);
+      img.addEventListener('load', () => { if (!img.naturalWidth) fallback(); });
+      if (img.complete && !img.naturalWidth) fallback();
+    });
+
     grid.querySelectorAll('.mockup-viewport').forEach(vp => {
-      if (vp.querySelector('.mockup-placeholder')) {
-        const slot = vp.closest('.mockup-slot');
-        const slotId = slot.querySelector('[data-slot-input]')?.dataset.slotInput;
-        if (!slotId) return;
-        setupDragDrop(vp, slotId);
-      }
+      const slotId = vp.closest('.mockup-slot').querySelector('[data-slot-input]')?.dataset.slotInput;
+      if (slotId) setupDragDrop(vp, slotId);
     });
   }
 
@@ -237,7 +265,9 @@
       if (!file || !file.type.startsWith('image/')) return;
       const reader = new FileReader();
       reader.onload = () => {
-        el.innerHTML = `<img src="${reader.result}" alt="Screenshot">`;
+        drops[slotId] = reader.result;
+        persistDrops();
+        renderMockups();
       };
       reader.readAsDataURL(file);
     });
@@ -245,6 +275,14 @@
 
   function persistMedia() {
     try { localStorage.setItem('pm-mockups-media', JSON.stringify(media)); } catch (e) {}
+  }
+
+  // Dropped images live only in this browser. Commit files to mockups/ to publish them.
+  function persistDrops() {
+    try { localStorage.setItem('pm-mockups-drops', JSON.stringify(drops)); } catch (e) {
+      delete drops[Object.keys(drops).pop()];
+      alert('That image is too large to keep in browser storage. Add it to the mockups/ folder instead.');
+    }
   }
 
   // ── Blog ───────────────────────────────────────────────────
