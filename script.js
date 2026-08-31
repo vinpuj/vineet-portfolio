@@ -18,7 +18,7 @@
     { title: 'Third-party SKU fulfilment', role: 'Senior Product Manager', year: '2010 — 2021', company: 'Dell', blurb: 'Owned sales-to-fulfilment platform capabilities for third-party vendor SKUs, enabling Day 1 employee productivity. SOC 2, HIPAA & GDPR in scope.', metric: '2×', metricLabel: 'B2C customer satisfaction', filter: 'platform' },
     { title: 'DevOps & release efficiency', role: 'Senior Product Manager', year: '2010 — 2021', company: 'Dell', blurb: 'Led DevOps & release improvements that cut deployment time and raised availability for business-critical systems.', metric: '9→2 hrs', metricLabel: 'deployment time', filter: 'platform' },
     { title: 'Enterprise commerce & CPQ', role: 'Senior Product Manager', year: '2010 — 2021', company: 'Dell', blurb: 'Led product management across sales, commerce, CPQ, fulfilment, payments, finance & partner-facing digital experiences.', metric: 'Global', metricLabel: 'sales, commerce & payment platforms', filter: 'platform' },
-    { title: 'The Twenty Handmade Chocolates', role: 'Co-founder', year: '2016 — 2019', company: 'Founder', blurb: 'Co-founded a handmade chocolate gifting service in Bengaluru; partnered with Dunzo, Swiggy & Zomato.', metric: '+10% YoY', metricLabel: '2016–2019 growth', filter: 'founder' }
+    { title: 'Twenty Hampers', role: 'Co-founder', year: '2016 — 2019', company: 'Founder', blurb: 'Co-founded a handmade chocolate gifting service in Bengaluru; partnered with Dunzo, Swiggy & Zomato.', metric: '+10% YoY', metricLabel: '2016–2019 growth', filter: 'founder' }
   ];
 
   const SEED_POSTS = [
@@ -134,7 +134,7 @@
   const MOCKUP_SLOTS = [
     { id: 'mock-automation360', title: 'Automation 360 · AI Agent Studio', subtitle: 'Agentic automation platform — Automation Anywhere', url: 'automationanywhere.com', image: 'mockups/mock-automation360.jpg' },
     { id: 'mock-citrix', title: 'Citrix developer platform', subtitle: 'API gateway & developer portal — Citrix', url: 'developer-docs.citrix.com', image: 'mockups/mock-citrix.jpg' },
-    { id: 'mock-dell', title: 'Dell PartnerDirect', subtitle: 'Channel self-service & fulfillment — Dell', url: 'partnerdirect.dell.com', image: 'mockups/mock-dell.jpg' },
+    { id: 'mock-dell', title: 'Dell Partner Portal', subtitle: 'Channel self-service & fulfillment — Dell', url: 'delltechnologies.com/partner', image: 'mockups/mock-dell.jpg' },
     { id: 'mock-chocolate', title: 'Twenty Hampers', subtitle: 'Co-founded gifting venture — Bengaluru', url: 'twentyhampers.com', image: 'mockups/mock-chocolate.jpg' }
   ];
 
