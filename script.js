@@ -34,8 +34,6 @@
   let tileStyle = 'pastel';
   let composerOpen = false;
   let posts = [];
-  let media = {};
-  let drops = {};
   let gameActive = false;
   let gameOver = false;
   let score = 0;
@@ -47,8 +45,6 @@
 
   // ── Init ───────────────────────────────────────────────────
   function init() {
-    try { media = JSON.parse(localStorage.getItem('pm-mockups-media')) || {}; } catch (e) { media = {}; }
-    try { drops = JSON.parse(localStorage.getItem('pm-mockups-drops')) || {}; } catch (e) { drops = {}; }
     try { highScore = parseInt(localStorage.getItem('pm-choco-highscore') || '0', 10) || 0; } catch (e) {}
     try {
       const raw = localStorage.getItem('pm-blog-posts');
@@ -138,56 +134,13 @@
     { id: 'mock-chocolate', title: 'Twenty Hampers', subtitle: 'Co-founded gifting venture — Bengaluru', url: 'twentyhampers.com', image: 'mockups/mock-chocolate.jpg' }
   ];
 
-  function normalizeVideoUrl(raw) {
-    const url = (raw || '').trim();
-    if (!url) return null;
-    if (/\.(mp4|webm|ogg|mov|m4v)(\?|#|$)/i.test(url)) return { type: 'file', src: url };
-    let m;
-    if ((m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/i))) return { type: 'embed', src: 'https://www.youtube.com/embed/' + m[1] };
-    if ((m = url.match(/vimeo\.com\/(?:video\/)?(\d+)/i))) return { type: 'embed', src: 'https://player.vimeo.com/video/' + m[1] };
-    if ((m = url.match(/loom\.com\/(?:share|embed)\/([\w-]+)/i))) return { type: 'embed', src: 'https://www.loom.com/embed/' + m[1] };
-    return { type: 'embed', src: url };
-  }
-
-  const PLACEHOLDER = `<div class="mockup-placeholder">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
-          <div>Drop a screenshot</div>
-        </div>`;
-
   function renderMockups() {
     const grid = document.getElementById('mockups-grid');
     grid.innerHTML = '';
 
     MOCKUP_SLOTS.forEach(slot => {
-      const entry = media[slot.id];
-      const hasVideo = !!(entry && entry.url);
       const el = document.createElement('div');
       el.className = 'mockup-slot';
-
-      let viewportContent = '';
-      let inputRow = '';
-
-      if (hasVideo) {
-        const n = normalizeVideoUrl(entry.url);
-        if (n.type === 'file') {
-          viewportContent = `<video controls playsinline src="${esc(n.src)}" style="width:100%;height:100%;object-fit:cover;background:#000;display:block"></video>`;
-        } else {
-          viewportContent = `<iframe src="${esc(n.src)}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen loading="lazy" style="width:100%;height:100%;border:0;display:block"></iframe>`;
-        }
-        inputRow = `<button class="btn-remove-video" data-slot="${slot.id}">Remove video</button>`;
-      } else if (drops[slot.id]) {
-        viewportContent = `<img src="${esc(drops[slot.id])}" alt="${esc(slot.title)}">`;
-        inputRow = `<button class="btn-remove-video" data-slot-drop="${slot.id}">Remove image</button>`;
-      } else if (slot.image) {
-        viewportContent = `<img src="${esc(slot.image)}" alt="${esc(slot.title)}" data-shipped="${slot.id}">`;
-        inputRow = `<input type="text" placeholder="Paste a video link" data-slot-input="${slot.id}">
-          <button class="btn-embed" data-slot-embed="${slot.id}">Embed</button>`;
-      } else {
-        viewportContent = PLACEHOLDER;
-        inputRow = `<input type="text" placeholder="Paste a video link" data-slot-input="${slot.id}">
-          <button class="btn-embed" data-slot-embed="${slot.id}">Embed</button>`;
-      }
-
       el.innerHTML = `
         <div class="mockup-card">
           <div class="browser-chrome">
@@ -196,93 +149,14 @@
             <span class="traffic-dot traffic-green"></span>
             <span class="url-pill">${esc(slot.url)}</span>
           </div>
-          <div class="mockup-viewport">${viewportContent}</div>
+          <div class="mockup-viewport"><img src="${esc(slot.image)}" alt="${esc(slot.title)}"></div>
         </div>
         <div class="mockup-info">
           <h3>${esc(slot.title)}</h3>
           <span>${esc(slot.subtitle)}</span>
-          <div class="mockup-input-row">${inputRow}</div>
         </div>`;
-
       grid.appendChild(el);
     });
-
-    grid.querySelectorAll('.btn-embed').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const id = btn.dataset.slotEmbed;
-        const input = grid.querySelector(`[data-slot-input="${id}"]`);
-        const val = (input && input.value || '').trim();
-        if (!val) return;
-        media[id] = { url: val };
-        persistMedia();
-        renderMockups();
-      });
-    });
-
-    grid.querySelectorAll('.btn-remove-video').forEach(btn => {
-      btn.addEventListener('click', () => {
-        delete media[btn.dataset.slot];
-        persistMedia();
-        renderMockups();
-      });
-    });
-
-    grid.querySelectorAll('.btn-remove-video[data-slot-drop]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        delete drops[btn.dataset.slotDrop];
-        persistDrops();
-        renderMockups();
-      });
-    });
-
-    // A slot with no committed screenshot yet falls back to the drop prompt.
-    // Checks decoded size too: a dev server in SPA mode answers a missing
-    // file with index.html at status 200, so 'error' never fires.
-    grid.querySelectorAll('img[data-shipped]').forEach(img => {
-      const fallback = () => {
-        const vp = img.closest('.mockup-viewport');
-        if (vp) { vp.innerHTML = PLACEHOLDER; setupDragDrop(vp, img.dataset.shipped); }
-      };
-      img.addEventListener('error', fallback);
-      img.addEventListener('load', () => { if (!img.naturalWidth) fallback(); });
-      if (img.complete && !img.naturalWidth) fallback();
-    });
-
-    grid.querySelectorAll('.mockup-viewport').forEach(vp => {
-      const slotId = vp.closest('.mockup-slot').querySelector('[data-slot-input]')?.dataset.slotInput;
-      if (slotId) setupDragDrop(vp, slotId);
-    });
-  }
-
-  function setupDragDrop(el, slotId) {
-    let depth = 0;
-    el.addEventListener('dragenter', e => { e.preventDefault(); depth++; el.style.outline = '2px solid var(--accent)'; });
-    el.addEventListener('dragover', e => { e.preventDefault(); if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy'; });
-    el.addEventListener('dragleave', () => { if (--depth <= 0) { depth = 0; el.style.outline = ''; } });
-    el.addEventListener('drop', e => {
-      e.preventDefault(); depth = 0; el.style.outline = '';
-      const file = e.dataTransfer?.files?.[0];
-      if (!file || !file.type.startsWith('image/')) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        drops[slotId] = reader.result;
-        persistDrops();
-        renderMockups();
-      };
-      reader.readAsDataURL(file);
-    });
-  }
-
-  function persistMedia() {
-    try { localStorage.setItem('pm-mockups-media', JSON.stringify(media)); } catch (e) {}
-  }
-
-  // Dropped images live only in this browser. Commit files to mockups/ to publish them.
-  function persistDrops() {
-    try { localStorage.setItem('pm-mockups-drops', JSON.stringify(drops)); } catch (e) {
-      delete drops[Object.keys(drops).pop()];
-      alert('That image is too large to keep in browser storage. Add it to the mockups/ folder instead.');
-    }
   }
 
   // ── Blog ───────────────────────────────────────────────────
