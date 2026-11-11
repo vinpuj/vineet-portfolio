@@ -128,7 +128,7 @@
 
   // ── Mockups ────────────────────────────────────────────────
   const MOCKUP_SLOTS = [
-    { id: 'mock-automation360', title: 'Automation 360 · AI Agent Studio', subtitle: 'Agentic automation platform — Automation Anywhere', url: 'automationanywhere.com', image: 'mockups/mock-automation360.jpg' },
+    { id: 'mock-automation360', title: 'Automation 360 · Automation Anywhere Cloud Service and Integrations portfolio', subtitle: 'Agentic automation platform — Automation Anywhere', url: 'automationanywhere.com', image: 'mockups/mock-automation360.jpg' },
     { id: 'mock-citrix', title: 'Citrix developer platform', subtitle: 'API gateway & developer portal — Citrix', url: 'developer-docs.citrix.com', image: 'mockups/mock-citrix.jpg' },
     { id: 'mock-dell', title: 'Dell Partner Portal', subtitle: 'Channel self-service & fulfillment — Dell', url: 'delltechnologies.com/partner', image: 'mockups/mock-dell.jpg' },
     { id: 'mock-chocolate', title: 'Twenty Hampers', subtitle: 'Co-founded gifting venture — Bengaluru', url: 'twentyhampers.com', image: 'mockups/mock-chocolate.jpg' }
