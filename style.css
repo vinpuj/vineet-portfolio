@@ -305,47 +305,6 @@ body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(
 }
 
 /* ── Blog / Writing ─────────────────────────────────────────── */
-.btn-new-post {
-  font: 600 14px/1 var(--sans); color: #fff; background: var(--ink);
-  border: 0; border-radius: 999px; padding: 13px 20px;
-  cursor: pointer; transition: background .15s ease;
-}
-.btn-new-post:hover { background: var(--accent); }
-.composer {
-  background: var(--card); border: 1px solid var(--line);
-  border-radius: 20px; padding: 24px; margin-bottom: 24px;
-}
-.composer-row {
-  display: grid; grid-template-columns: 1fr 170px 150px; gap: 12px;
-}
-.composer input, .composer textarea {
-  font: 500 14px/1.3 var(--sans); color: var(--ink);
-  background: var(--cream); border: 1px solid var(--line);
-  border-radius: 12px; padding: 12px 14px; outline: none; width: 100%;
-}
-.composer input:first-child { font-weight: 600; font-size: 15px; }
-.composer textarea {
-  font-size: 14px; line-height: 1.5; margin-top: 12px;
-  resize: vertical; display: block;
-}
-.composer .url-input { margin-top: 12px; }
-.composer-actions { display: flex; gap: 10px; margin-top: 16px; }
-.btn-publish {
-  font: 600 14px/1 var(--sans); color: #fff; background: var(--accent);
-  border: 0; border-radius: 999px; padding: 13px 24px; cursor: pointer;
-}
-.btn-cancel {
-  font: 600 14px/1 var(--sans); color: var(--ink); background: transparent;
-  border: 1.5px solid color-mix(in srgb, var(--ink) 18%, transparent);
-  border-radius: 999px; padding: 12px 22px; cursor: pointer;
-  transition: border-color .15s ease;
-}
-.btn-cancel:hover { border-color: var(--ink); }
-.empty-state {
-  background: var(--card); border: 1px dashed var(--line);
-  border-radius: 20px; padding: 48px; text-align: center;
-}
-.empty-state p { font: 500 16px/1.5 var(--sans); color: var(--muted); margin: 0; }
 .blog-grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
   gap: 18px;
@@ -391,12 +350,6 @@ body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(
 }
 .btn-upvote:hover { color: var(--accent); border-color: var(--accent); }
 .btn-upvote.upvoted { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
-.btn-remove-post {
-  font: 500 13px/1 var(--sans); color: var(--muted); background: transparent;
-  border: 0; cursor: pointer; padding: 6px 0; margin-left: auto;
-  transition: color .15s ease;
-}
-.btn-remove-post:hover { color: var(--ink); }
 
 /* ── Chocolate Dash ─────────────────────────────────────────── */
 .game-card {
@@ -566,8 +519,7 @@ body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(
   .mockups-grid { grid-template-columns: 1fr; }
   .blog-grid { grid-template-columns: 1fr; }
   .about-cols { grid-template-columns: 1fr; }
-  .composer-row { grid-template-columns: 1fr; }
-}
+  }
 @media (max-width: 480px) {
   .hero { padding-left: 20px; padding-right: 20px; }
   .section { padding-left: 20px; padding-right: 20px; }

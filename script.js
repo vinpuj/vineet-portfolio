@@ -32,8 +32,7 @@
   // ── State ──────────────────────────────────────────────────
   let filter = 'all';
   let tileStyle = 'pastel';
-  let composerOpen = false;
-  let posts = [];
+  let votes = {};
   let gameActive = false;
   let gameOver = false;
   let score = 0;
@@ -46,10 +45,7 @@
   // ── Init ───────────────────────────────────────────────────
   function init() {
     try { highScore = parseInt(localStorage.getItem('pm-choco-highscore') || '0', 10) || 0; } catch (e) {}
-    try {
-      const raw = localStorage.getItem('pm-blog-posts');
-      posts = raw ? (JSON.parse(raw) || []) : SEED_POSTS.slice();
-    } catch (e) { posts = SEED_POSTS.slice(); }
+    try { votes = JSON.parse(localStorage.getItem('pm-blog-votes')) || {}; } catch (e) { votes = {}; }
 
     renderWork();
     renderMockups();
@@ -63,9 +59,6 @@
       });
     });
 
-    document.getElementById('btn-new-post').addEventListener('click', toggleComposer);
-    document.getElementById('btn-publish').addEventListener('click', addPost);
-    document.getElementById('btn-cancel-post').addEventListener('click', toggleComposer);
     document.getElementById('btn-start-game').addEventListener('click', startGame);
   }
 
@@ -160,24 +153,14 @@
   }
 
   // ── Blog ───────────────────────────────────────────────────
+  // Posts come from SEED_POSTS; add or edit them in the code. A visitor's
+  // upvote is remembered in their own browser only.
   function renderBlog() {
-    const composer = document.getElementById('composer');
-    composer.style.display = composerOpen ? 'block' : 'none';
-
-    const emptyState = document.getElementById('blog-empty');
     const grid = document.getElementById('blog-grid');
-
-    if (posts.length === 0) {
-      emptyState.style.display = 'block';
-      grid.style.display = 'none';
-      return;
-    }
-
-    emptyState.style.display = 'none';
-    grid.style.display = '';
     grid.innerHTML = '';
 
-    posts.forEach(post => {
+    SEED_POSTS.forEach(post => {
+      const voted = !!votes[post.id];
       const card = document.createElement('div');
       card.className = 'blog-card';
       card.innerHTML = `
@@ -189,69 +172,22 @@
         <p>${esc(post.summary)}</p>
         <div class="blog-card-bottom">
           ${post.url ? `<a href="${esc(post.url)}" target="_blank" rel="noopener">Read post →</a>` : '<span></span>'}
-          <button class="btn-upvote${post.upvoted ? ' upvoted' : ''}" data-post-id="${post.id}">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="${post.upvoted ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
-            <span>${post.upvotes || 0}</span>
+          <button class="btn-upvote${voted ? ' upvoted' : ''}" data-post-id="${post.id}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="${voted ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+            <span>${(post.upvotes || 0) + (voted ? 1 : 0)}</span>
           </button>
-          <button class="btn-remove-post" data-post-id="${post.id}">Remove</button>
         </div>`;
       grid.appendChild(card);
     });
 
     grid.querySelectorAll('.btn-upvote').forEach(btn => {
       btn.addEventListener('click', () => {
-        const post = posts.find(p => p.id === Number(btn.dataset.postId));
-        if (!post) return;
-        if (post.upvoted) {
-          post.upvotes = Math.max(0, (post.upvotes || 0) - 1);
-          post.upvoted = false;
-        } else {
-          post.upvotes = (post.upvotes || 0) + 1;
-          post.upvoted = true;
-        }
-        persistPosts();
+        const id = btn.dataset.postId;
+        if (votes[id]) delete votes[id]; else votes[id] = true;
+        try { localStorage.setItem('pm-blog-votes', JSON.stringify(votes)); } catch (e) {}
         renderBlog();
       });
     });
-
-    grid.querySelectorAll('.btn-remove-post').forEach(btn => {
-      btn.addEventListener('click', () => {
-        posts = posts.filter(p => p.id !== Number(btn.dataset.postId));
-        persistPosts();
-        renderBlog();
-      });
-    });
-  }
-
-  function toggleComposer() {
-    composerOpen = !composerOpen;
-    renderBlog();
-  }
-
-  function addPost() {
-    const title = document.getElementById('post-title').value.trim();
-    if (!title) return;
-    const tag = document.getElementById('post-tag').value.trim() || 'Note';
-    const date = document.getElementById('post-date').value.trim() || todayStr();
-    const summary = document.getElementById('post-summary').value.trim();
-    const url = document.getElementById('post-url').value.trim();
-
-    posts.unshift({ id: Date.now(), title, date, tag, summary, url });
-    composerOpen = false;
-    persistPosts();
-    renderBlog();
-
-    ['post-title', 'post-tag', 'post-date', 'post-summary', 'post-url'].forEach(id => {
-      document.getElementById(id).value = '';
-    });
-  }
-
-  function persistPosts() {
-    try { localStorage.setItem('pm-blog-posts', JSON.stringify(posts)); } catch (e) {}
-  }
-
-  function todayStr() {
-    try { return new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }); } catch (e) { return ''; }
   }
 
   // ── Chocolate Dash ─────────────────────────────────────────
