@@ -22,9 +22,9 @@
   ];
 
   const SEED_POSTS = [
-    { id: 1, title: 'Designing MCP architecture for enterprise agents', date: 'Jun 2026', tag: 'AI', summary: 'How we structured the Model Context Protocol layer so multi-agent systems stay composable and secure at enterprise scale.', url: '', upvotes: 0 },
-    { id: 2, title: 'From 0 to 1 to 10: scaling two SaaS products', date: 'Apr 2026', tag: 'Product', summary: 'Lessons on momentum, prioritization, and the metrics that actually matter when you take a product from concept to scale.', url: '', upvotes: 0 },
-    { id: 3, title: 'What developer evangelism taught me about GTM', date: 'Feb 2026', tag: 'GTM', summary: 'Battlecards, demos, and DeployFest 2026: why the best go-to-market is built with developers, not at them.', url: '', upvotes: 0 }
+    { id: 1, title: 'Designing MCP architecture for enterprise agents', date: 'Jun 2026', tag: 'AI', summary: 'How we structured the Model Context Protocol layer so multi-agent systems stay composable and secure at enterprise scale.', url: '' },
+    { id: 2, title: 'From 0 to 1 to 10: scaling two SaaS products', date: 'Apr 2026', tag: 'Product', summary: 'Lessons on momentum, prioritization, and the metrics that actually matter when you take a product from concept to scale.', url: '' },
+    { id: 3, title: 'What developer evangelism taught me about GTM', date: 'Feb 2026', tag: 'GTM', summary: 'Battlecards, demos, and DeployFest 2026: why the best go-to-market is built with developers, not at them.', url: '' }
   ];
 
   const TWITTER_HANDLE = 'vineetpujari';
@@ -32,7 +32,6 @@
   // ── State ──────────────────────────────────────────────────
   let filter = 'all';
   let tileStyle = 'pastel';
-  let votes = {};
   let gameActive = false;
   let gameOver = false;
   let score = 0;
@@ -45,8 +44,6 @@
   // ── Init ───────────────────────────────────────────────────
   function init() {
     try { highScore = parseInt(localStorage.getItem('pm-choco-highscore') || '0', 10) || 0; } catch (e) {}
-    try { votes = JSON.parse(localStorage.getItem('pm-blog-votes')) || {}; } catch (e) { votes = {}; }
-
     renderWork();
     renderMockups();
     renderBlog();
@@ -153,14 +150,12 @@
   }
 
   // ── Blog ───────────────────────────────────────────────────
-  // Posts come from SEED_POSTS; add or edit them in the code. A visitor's
-  // upvote is remembered in their own browser only.
+  // Posts come from SEED_POSTS; add or edit them in the code.
   function renderBlog() {
     const grid = document.getElementById('blog-grid');
     grid.innerHTML = '';
 
     SEED_POSTS.forEach(post => {
-      const voted = !!votes[post.id];
       const card = document.createElement('div');
       card.className = 'blog-card';
       card.innerHTML = `
@@ -172,21 +167,8 @@
         <p>${esc(post.summary)}</p>
         <div class="blog-card-bottom">
           ${post.url ? `<a href="${esc(post.url)}" target="_blank" rel="noopener">Read post →</a>` : '<span></span>'}
-          <button class="btn-upvote${voted ? ' upvoted' : ''}" data-post-id="${post.id}">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="${voted ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
-            <span>${(post.upvotes || 0) + (voted ? 1 : 0)}</span>
-          </button>
         </div>`;
       grid.appendChild(card);
-    });
-
-    grid.querySelectorAll('.btn-upvote').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const id = btn.dataset.postId;
-        if (votes[id]) delete votes[id]; else votes[id] = true;
-        try { localStorage.setItem('pm-blog-votes', JSON.stringify(votes)); } catch (e) {}
-        renderBlog();
-      });
     });
   }
 
